@@ -13,6 +13,7 @@ import { BsFillPlusCircleFill } from 'react-icons/bs';
 import { AiOutlineLineChart } from 'react-icons/ai';
 import { useUser } from './UserProvider';
 import { TfiDownload } from 'react-icons/tfi';
+import Button from './Button';
 
 const tabs = [
   {
@@ -46,7 +47,7 @@ function Sidebar() {
   const { user } = useUser();
 
   return (
-    <aside className="h-screen w-[17rem] border-r-2 border-gray-300 py-6 px-4 flex flex-col gap-2 text-gray-500">
+    <aside className="h-screen overflow-y-auto w-[17rem] border-r-2 border-gray-300 py-6 px-4 flex flex-col gap-2 text-gray-500">
       <div className="flex items-center gap-3">
         <div className="p-2 rounded-md bg-gray-200 w-fit">
           <FaUser size={22} />
@@ -54,7 +55,7 @@ function Sidebar() {
         <span className="capitalize font-semibold">{user?.name}</span>
       </div>
       <ActionButtons />
-      <div className="flex flex-col gap-1 mt-2">
+      <div className="flex flex-col mt-2">
         {tabs.map((tab, i) => (
           <button
             className={`w-full flex items-center gap-2 p-2 font-medium ${
@@ -67,11 +68,11 @@ function Sidebar() {
           </button>
         ))}
       </div>
-      <button className="w-full bg-violet-900 text-white p-3 rounded-lg flex items-center gap-2 justify-center">
+      <Button>
         Create new task
         <BsFillPlusCircleFill size={20} />
-      </button>
-      <div className="flex items-end flex-1 w-full">
+      </Button>
+      <div className="flex items-end flex-1 w-full mt-5">
         <button className="w-full flex gap-4 items-center justify-center bg-gray-100 rounded-lg p-2">
           <TfiDownload size={20} />
           <div className="flex flex-col items-start">

@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';
 import { useMutation } from '@tanstack/react-query';
 import { signup } from '@/api/user';
+import Button from '@/components/Button';
 
 export default function SignupPage() {
   const [name, setName] = useState('');
@@ -87,7 +88,7 @@ export default function SignupPage() {
           <input
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="bg-gray-200 rounded-md py-2 px-3 w-full outline-gray-400"
+            className="bg-gray-200 rounded-md py-2 px-3 pr-7 w-full outline-gray-400"
             placeholder="Password"
             type={showPassword ? 'text' : 'password'}
             required
@@ -101,9 +102,7 @@ export default function SignupPage() {
             )}
           </button>
         </div>
-        <button className="w-full text-white bg-indigo-700 rounded-lg py-2 px-4" type="submit">
-          Sign up
-        </button>
+        <Button type="submit">Sign up</Button>
         <div className="text-center mt-3">
           <span className="text-gray-500">Already have an account? </span>
           <Link className="text-blue-800" href="/login">

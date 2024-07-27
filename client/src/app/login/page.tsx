@@ -9,6 +9,7 @@ import { AxiosError } from 'axios';
 import toast from 'react-hot-toast';
 import { useUser } from '@/components/UserProvider';
 import { useRouter } from 'next/navigation';
+import Button from '@/components/Button';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -75,7 +76,7 @@ export default function LoginPage() {
           <input
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="bg-gray-200 rounded-md py-2 px-3 w-full outline-gray-400"
+            className="bg-gray-200 rounded-md py-2 px-3 pr-7 w-full outline-gray-400"
             placeholder="Password"
             type={showPassword ? 'text' : 'password'}
             required
@@ -89,13 +90,9 @@ export default function LoginPage() {
             )}
           </button>
         </div>
-        <button
-          disabled={loginMutation.isPending}
-          className="w-full text-white bg-indigo-700 disabled:bg-indigo-400 rounded-lg py-2 px-4"
-          type="submit"
-        >
+        <Button disabled={loginMutation.isPending} type="submit">
           Login
-        </button>
+        </Button>
         <div className="text-center mt-3">
           <span className="text-gray-500">Don’t have an account? Create a </span>
           <Link className="text-blue-800" href="/signup">
