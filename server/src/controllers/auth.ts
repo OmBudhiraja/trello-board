@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
-import { generateToken } from '../utils/token';
 import { z } from 'zod';
+import bcrypt from 'bcrypt';
+import { generateToken } from '../utils/token';
 import { validate } from '../middleware/validation';
-import User from '../models/usersModel';
+import UserModel from '../models/usersModel';
 import { setCookie } from '../utils/cookie';
 
 const loginBodySchema = z.object({
@@ -11,31 +12,36 @@ const loginBodySchema = z.object({
 });
 
 export const login = async (req: Request, res: Response) => {
-  const { sucess, body } = validate(loginBodySchema, req, res);
+  try {
+    const { sucess, body } = validate(loginBodySchema, req, res);
 
-  if (!sucess) {
-    return;
+    if (!sucess) {
+      return;
+    }
+
+    // find user with the email
+    const user = await UserModel.findOne({
+      email: body.email,
+    }).select('+password');
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
+    // check password
+    if (!(await bcrypt.compare(body.password, user.password))) {
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
+    const token = await generateToken(user._id.toString());
+
+    // set cookie
+    setCookie(res, 'token', token);
+    res.json({ user: { ...user.toJSON(), password: undefined } });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Internal server error' });
   }
-
-  // find user with the email
-  const user = await User.findOne({
-    email: body.email,
-  }).select('+password');
-
-  if (!user) {
-    return res.status(400).json({ message: 'Invalid credentials' });
-  }
-
-  // check password
-  if (!(await user.checkPassword(body.password, user.password))) {
-    return res.status(400).json({ message: 'Invalid credentials' });
-  }
-
-  const token = await generateToken(user._id.toString());
-
-  // set cookie
-  setCookie(res, 'token', token);
-  res.json({ user: { ...user.toJSON(), password: undefined } });
 };
 
 const signupBodySchema = z.object({
@@ -53,7 +59,7 @@ export const signup = async (req: Request, res: Response) => {
     }
 
     // check user with email exists
-    const usersExists = await User.findOne({
+    const usersExists = await UserModel.findOne({
       email: body.email,
     });
 
@@ -62,7 +68,7 @@ export const signup = async (req: Request, res: Response) => {
     }
 
     // create user
-    const user = await User.create({
+    const user = await UserModel.create({
       name: body.name,
       email: body.email,
       password: body.password,

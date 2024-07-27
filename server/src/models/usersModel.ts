@@ -1,32 +1,29 @@
-import mongoose from 'mongoose';
+import { InferSchemaType, Schema, model } from 'mongoose';
 import bcrypt from 'bcrypt';
 
-export interface IUser extends mongoose.Document {
-  _id: string;
-  name: string;
-  email: string;
-  password: string;
-  checkPassword(inputPassword: string, storedPassword: string): Promise<boolean>;
-}
-
-const userSchema = new mongoose.Schema<IUser, mongoose.Model<IUser>>({
-  name: {
-    type: String,
-    required: [true, 'Name field is required'],
+const userSchema = new Schema(
+  {
+    name: {
+      type: String,
+      required: [true, 'Name field is required'],
+    },
+    email: {
+      type: String,
+      required: [true, 'Email is required'],
+      unique: true,
+      lowercase: true,
+    },
+    password: {
+      type: String,
+      required: [true, 'Password is required.'],
+      minlength: 6,
+      select: false,
+    },
   },
-  email: {
-    type: String,
-    required: [true, 'Email is required'],
-    unique: true,
-    lowercase: true,
-  },
-  password: {
-    type: String,
-    required: [true, 'Password is required.'],
-    minlength: 6,
-    select: false,
-  },
-});
+  {
+    timestamps: true,
+  }
+);
 
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
@@ -34,10 +31,7 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-userSchema.methods.checkPassword = async function (inputPassword: string, storedPassword: string) {
-  return await bcrypt.compare(inputPassword, storedPassword);
-};
+export type User = InferSchemaType<typeof userSchema>;
+const UserModel = model('User', userSchema);
 
-const User = mongoose.model<IUser>('User', userSchema);
-
-export default User;
+export default UserModel;
