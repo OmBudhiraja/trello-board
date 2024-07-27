@@ -1,22 +1,58 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { VscEye } from 'react-icons/vsc';
 import { VscEyeClosed } from 'react-icons/vsc';
+import { useMutation } from '@tanstack/react-query';
+import { login } from '@/api/user';
+import { AxiosError } from 'axios';
+import toast from 'react-hot-toast';
+import { useUser } from '@/components/UserProvider';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
+  const { user, setUser } = useUser();
+  const router = useRouter();
+
+  const loginMutation = useMutation({
+    mutationFn: login,
+    onError: (err) => {
+      if (err instanceof AxiosError) {
+        toast.error(err.response?.data.message || 'Something went wrong');
+      } else {
+        console.error(err, 'error');
+        toast.error(err.message);
+      }
+    },
+    onSuccess: (data) => {
+      setUser(data.user);
+      toast.success('Login successful');
+    },
+  });
+
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    loginMutation.mutate({ email, password });
+  }
+
+  useEffect(() => {
+    if (user) {
+      router.replace('/');
+    }
+  }, [user, router]);
+
+  if (user) {
+    return null;
   }
 
   return (
     <main
       className="min-h-screen flex justify-center items-center px-16 py-20 max-md:px-5"
-      style={{ background: 'linear-gradient(180deg, #FFFFFF 0%, #AFA3FF 100%);' }}
+      style={{ background: 'linear-gradient(180deg, #FFFFFF 0%, #AFA3FF 100%)' }}
     >
       <form
         className="max-w-lg flex flex-col gap-6 p-16 mt-10 rounded-2xl border border-solid border-stone-300 w-[648px] max-md:px-5 bg-white text-gray-600"
@@ -53,7 +89,11 @@ export default function LoginPage() {
             )}
           </button>
         </div>
-        <button className="w-full text-white bg-indigo-700 rounded-lg py-2 px-4" type="submit">
+        <button
+          disabled={loginMutation.isPending}
+          className="w-full text-white bg-indigo-700 disabled:bg-indigo-400 rounded-lg py-2 px-4"
+          type="submit"
+        >
           Login
         </button>
         <div className="text-center mt-3">

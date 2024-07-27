@@ -39,7 +39,7 @@ export const login = async (req: Request, res: Response) => {
 };
 
 const signupBodySchema = z.object({
-  name: z.string(),
+  name: z.string().min(2),
   email: z.string().email(),
   password: z.string().min(6),
 });
@@ -88,4 +88,9 @@ export const signup = async (req: Request, res: Response) => {
 
 export const logout = async (_: Request, res: Response) => {
   res.clearCookie('token').json({ message: 'Logged out' });
+};
+
+export const me = async (req: Request, res: Response) => {
+  const user = req.user;
+  res.json({ user });
 };
