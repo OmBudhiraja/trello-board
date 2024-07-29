@@ -43,7 +43,7 @@ const tabs = [
   },
 ];
 
-function Sidebar() {
+function Sidebar({setShowTaskDrawer}: { setShowTaskDrawer: (val: boolean) => void }) {
   const { user } = useUser();
 
   return (
@@ -68,7 +68,7 @@ function Sidebar() {
           </button>
         ))}
       </div>
-      <Button>
+      <Button onClick={() => setShowTaskDrawer(true)}>
         Create new task
         <BsFillPlusCircleFill size={20} />
       </Button>

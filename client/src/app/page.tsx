@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Sidebar from '@/components/Sidebar';
 import { useUser } from '@/components/UserProvider';
 import { useRouter } from 'next/navigation';
@@ -13,10 +13,13 @@ import { FiFilter } from 'react-icons/fi';
 import { GoShareAndroid } from 'react-icons/go';
 import Button from '@/components/Button';
 import Board from '@/components/Board';
+import { DrawerRoot } from '@/components/TaskDrawer';
 
 export default function Home() {
   const { user } = useUser();
   const router = useRouter();
+
+  const [showTaskDrawer, setShowTaskDrawer] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -29,55 +32,57 @@ export default function Home() {
   }
 
   return (
-    <main className="h-screen overflow-hidden flex text-gray-600">
-      <Sidebar />
-      <div className="overflow-hidden flex-1 h-screen w-full py-6 px-4 flex flex-col gap-4 bg-gray-100">
-        <section className="flex justify-between items-center">
-          <h3 className="text-2xl lg:text-3xl font-semibold">Good morning, {user.name}!</h3>
-          <button className="text-sm lg:text-base flex gap-2 items-center">
-            <span>Help & Feedback</span>
-            <BsQuestionCircle size={20} />
-          </button>
-        </section>
-        <Cards />
-        <section className="flex items-center justify-between">
-          <div className="relative w-48">
-            <input
-              type="text"
-              placeholder="Search"
-              className="bg-white rounded-md py-1.5 px-3 pr-7 w-full border-[1.5px] border-gray-200 outline-gray-400"
-            />
-            <FiSearch
-              size={20}
-              className="absolute cursor-default top-1/2 -translate-y-1/2 right-2 text-gray-500"
-            />
-          </div>
-          <div className="flex items-center gap-2 lg:gap-3.5">
-            <button className="w-fit flex items-center gap-2 justify-center rounded-md py-2 px-2 text-xs lg:text-sm">
-              Calender View
-              <CiCalendar className="size-3.5 lg:size-5" />
+    <DrawerRoot open={showTaskDrawer} onOpenChange={(val) => setShowTaskDrawer(val)}>
+      <main className="h-screen overflow-hidden flex text-gray-600">
+        <Sidebar setShowTaskDrawer={setShowTaskDrawer} />
+        <div className="overflow-hidden flex-1 h-screen w-full py-6 px-4 flex flex-col gap-4 bg-gray-100">
+          <section className="flex justify-between items-center">
+            <h3 className="text-2xl lg:text-3xl font-semibold">Good morning, {user.name}!</h3>
+            <button className="text-sm lg:text-base flex gap-2 items-center">
+              <span>Help & Feedback</span>
+              <BsQuestionCircle size={20} />
             </button>
-            <button className="w-fit flex items-center gap-2 justify-center rounded-md py-2 px-2 text-xs lg:text-sm">
-              Automation
-              <BsStars className="size-3.5 lg:size-5" />
-            </button>
-            <button className="w-fit flex items-center gap-2 justify-center rounded-md py-2 px-2 text-xs lg:text-sm">
-              Filter
-              <FiFilter className="size-3.5 lg:size-5" />
-            </button>
-            <button className="w-fit flex items-center gap-2 justify-center rounded-md py-2 px-2 text-xs lg:text-sm">
-              Share
-              <GoShareAndroid className="size-3.5 lg:size-5" />
-            </button>
-            <Button className="w-fit shrink-0 lg:px-2.5">
-              Create New
-              <BsFillPlusCircleFill size={20} />
-            </Button>
-          </div>
-        </section>
-        <Board />
-      </div>
-    </main>
+          </section>
+          <Cards />
+          <section className="flex items-center justify-between">
+            <div className="relative w-48">
+              <input
+                type="text"
+                placeholder="Search"
+                className="bg-white rounded-md py-1.5 px-3 pr-7 w-full border-[1.5px] border-gray-200 outline-gray-400"
+              />
+              <FiSearch
+                size={20}
+                className="absolute cursor-default top-1/2 -translate-y-1/2 right-2 text-gray-500"
+              />
+            </div>
+            <div className="flex items-center gap-2 lg:gap-3.5">
+              <button className="w-fit flex items-center gap-2 justify-center rounded-md py-2 px-2 text-xs lg:text-sm">
+                Calender View
+                <CiCalendar className="size-3.5 lg:size-5" />
+              </button>
+              <button className="w-fit flex items-center gap-2 justify-center rounded-md py-2 px-2 text-xs lg:text-sm">
+                Automation
+                <BsStars className="size-3.5 lg:size-5" />
+              </button>
+              <button className="w-fit flex items-center gap-2 justify-center rounded-md py-2 px-2 text-xs lg:text-sm">
+                Filter
+                <FiFilter className="size-3.5 lg:size-5" />
+              </button>
+              <button className="w-fit flex items-center gap-2 justify-center rounded-md py-2 px-2 text-xs lg:text-sm">
+                Share
+                <GoShareAndroid className="size-3.5 lg:size-5" />
+              </button>
+              <Button className="w-fit shrink-0 lg:px-2.5" onClick={() => setShowTaskDrawer(true)}>
+                Create New
+                <BsFillPlusCircleFill size={20} />
+              </Button>
+            </div>
+          </section>
+          <Board showTaskDrawer={showTaskDrawer} setShowTaskDrawer={setShowTaskDrawer} />
+        </div>
+      </main>
+    </DrawerRoot>
   );
 }
 

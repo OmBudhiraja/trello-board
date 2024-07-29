@@ -5,6 +5,7 @@ export interface User {
 }
 
 export const defaultTaskStatus = ['to do', 'in progress', 'under review', 'completed'] as const;
+export const priorityOptions = ['low', 'medium', 'urgent'] as const;
 
 export type TaskStatus = (typeof defaultTaskStatus)[number];
 
@@ -13,7 +14,7 @@ export interface Task {
   title: string;
   description?: string;
   status: TaskStatus;
-  priority?: 'low' | 'medium' | 'urgent';
+  priority?: (typeof priorityOptions)[number];
   userId: string;
   position: number;
   deadline?: Date;

@@ -1,4 +1,5 @@
 'use client';
+import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { BiLoaderAlt, BiMenuAltLeft } from 'react-icons/bi';
 import { DragDropContext, Droppable, type DropResult } from '@hello-pangea/dnd';
@@ -7,6 +8,7 @@ import { getTasks } from '@/api/task';
 import { defaultTaskStatus, type Task, type TaskStatus } from '@/types';
 import Button from './Button';
 import TaskCard from './TaskCard';
+import TaskDrawer from './TaskDrawer';
 
 const task: Task = {
   _id: '1',
@@ -22,7 +24,22 @@ const task: Task = {
   updatedAt: new Date(),
 };
 
-function Board() {
+const defaultEmptyTask: Partial<Task> = {
+  title: '',
+  description: '',
+  status: undefined,
+  priority: undefined,
+  deadline: undefined,
+  position: -1,
+};
+
+function Board({
+  showTaskDrawer,
+  setShowTaskDrawer,
+}: {
+  showTaskDrawer: boolean;
+  setShowTaskDrawer: (val: boolean) => void;
+}) {
   const { isLoading, data: groupedTasks } = useQuery({
     queryKey: ['tasks'],
     queryFn: getTasks,
@@ -37,6 +54,14 @@ function Board() {
     },
     refetchOnWindowFocus: false,
   });
+
+  const [activeTask, setActiveTask] = useState<Partial<Task>>(defaultEmptyTask);
+
+  useEffect(() => {
+    if (!showTaskDrawer) {
+      setActiveTask(defaultEmptyTask);
+    }
+  }, [showTaskDrawer]);
 
   function handleDragEnd(result: DropResult) {
     if (!result.destination) return;
@@ -57,22 +82,45 @@ function Board() {
       <section className="bg-white rounded-lg h-full flex-1 flex gap-4 p-4 mt-2 overflow-auto custom-scrollar">
         {groupedTasks &&
           Object.entries(groupedTasks).map(([status, tasks]) => (
-            <Column key={status} name={status} tasks={tasks} />
+            <Column
+              key={status}
+              name={status as TaskStatus}
+              tasks={tasks}
+              setShowTaskDrawer={setShowTaskDrawer}
+              setActiveTask={setActiveTask}
+            />
           ))}
 
         {groupedTasks && Object.entries(groupedTasks).length === 0 && (
           <>
             {defaultTaskStatus.map((status) => (
-              <Column key={status} name={status} tasks={status === 'to do' ? [task] : []} />
+              <Column
+                key={status}
+                name={status}
+                tasks={status === 'to do' ? [task] : []}
+                setShowTaskDrawer={setShowTaskDrawer}
+                setActiveTask={setActiveTask}
+              />
             ))}
           </>
         )}
       </section>
+      <TaskDrawer task={activeTask} />
     </DragDropContext>
   );
 }
 
-function Column({ name, tasks }: { name: string; tasks: Task[] }) {
+function Column({
+  name,
+  tasks,
+  setShowTaskDrawer,
+  setActiveTask,
+}: {
+  name: TaskStatus;
+  tasks: Task[];
+  setShowTaskDrawer: (val: boolean) => void;
+  setActiveTask: Dispatch<SetStateAction<Partial<Task>>>;
+}) {
   return (
     <Droppable droppableId={name}>
       {(provided) => (
@@ -92,7 +140,16 @@ function Column({ name, tasks }: { name: string; tasks: Task[] }) {
           ))}
           {provided.placeholder}
 
-          <Button className="justify-between bg-neutral-800 font-normal">
+          <Button
+            onClick={() => {
+              setActiveTask((prev) => ({
+                ...prev,
+                status: name,
+              }));
+              setShowTaskDrawer(true);
+            }}
+            className="justify-between bg-neutral-800 font-normal"
+          >
             Add new
             <IoMdAdd size={20} />
           </Button>
