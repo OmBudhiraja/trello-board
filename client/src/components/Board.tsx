@@ -1,30 +1,14 @@
 'use client';
-import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { BiLoaderAlt, BiMenuAltLeft } from 'react-icons/bi';
-import { DragDropContext, Droppable, type DropResult } from '@hello-pangea/dnd';
-import { IoMdAdd } from 'react-icons/io';
-import { getTasks } from '@/api/task';
+import { useEffect, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
+import { DragDropContext, type DropResult } from '@hello-pangea/dnd';
+import { BiLoaderAlt } from 'react-icons/bi';
+import { createTask, getTasks, updateTask } from '@/api/task';
 import { defaultTaskStatus, type Task, type TaskStatus } from '@/types';
-import Button from './Button';
-import TaskCard from './TaskCard';
 import TaskDrawer from './TaskDrawer';
-
-const task: Task = {
-  _id: '1',
-  title: 'Implement User Authentication with JWT',
-  description:
-    'Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quod quasi autem tempore ut corporis nulla consectetur voluptatem adipisci, sed rerum architecto explicabo accusamus, perferendis sint.',
-  status: 'to do',
-  priority: 'urgent',
-  content:
-    'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Molestiae ipsum exercitationem culpa aperiam expedita eius? Voluptas, praesentium adipisci corporis dolorem aliquid expedita quae veritatis iste ducimus provident cum ut deserunt, alias aut itaque eum porro non! Quia nam beatae fugit aperiam autem nostrum voluptatibus id ad expedita vitae, ipsa aliquam, quod excepturi. Minima commodi esse quidem assumenda! Dignissimos eveniet voluptatum fuga quisquam. Maxime magni est sit reiciendis at quidem sequi odit labore repellendus quasi itaque iste expedita quos, sapiente similique provident quibusdam velit! Laboriosam nobis laudantium iste necessitatibus doloribus aliquid reprehenderit qui, repellat, natus atque reiciendis sint vitae ex perferendis.',
-  userId: '1',
-  deadline: new Date('2022-12-31'),
-  position: 1,
-  createdAt: new Date(),
-  updatedAt: new Date(),
-};
+import Column from './Column';
+import { transformTaskList } from '@/utils/transformTaskData';
 
 const defaultEmptyTask: Partial<Task> = {
   title: '',
@@ -42,26 +26,56 @@ function Board({
   showTaskDrawer: boolean;
   setShowTaskDrawer: (val: boolean) => void;
 }) {
+  const queryClient = useQueryClient();
   const { isLoading, data: groupedTasks } = useQuery({
     queryKey: ['tasks'],
     queryFn: getTasks,
-    select: (data) => {
-      return data.tasks.reduce((acc, task) => {
-        if (!acc[task.status]) {
-          acc[task.status] = [];
-        }
-        acc[task.status].push(task);
-        return acc;
-      }, {} as Record<TaskStatus, Task[]>);
-    },
+    select: transformTaskList,
     refetchOnWindowFocus: false,
   });
 
+  const addTaskMutation = useMutation({
+    mutationFn: createTask,
+    onSuccess: ({ task: newTask }) => {
+      toast.success('Task created successfully');
+
+      queryClient.setQueryData(['tasks'], (oldData: { tasks: Task[] }) => {
+        const updatedTasks = [...oldData.tasks, newTask];
+        return { tasks: updatedTasks };
+      });
+
+      setShowTaskDrawer(false);
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+  });
+
+  const updateTaskMutation = useMutation({
+    mutationFn: updateTask,
+    onSuccess: ({ task: updatedTask }) => {
+      toast.success('Task updated successfully');
+
+      queryClient.setQueryData(['tasks'], (oldData: { tasks: Task[] }) => {
+        const updatedTasks = oldData.tasks.map((task) => {
+          if (task._id === updatedTask._id) {
+            return updatedTask;
+          }
+          return task;
+        });
+        return { tasks: updatedTasks };
+      });
+
+      setShowTaskDrawer(false);
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+  });
+
   const [activeTask, setActiveTask] = useState<Partial<Task>>(defaultEmptyTask);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   useEffect(() => {
     if (!showTaskDrawer) {
       setActiveTask(defaultEmptyTask);
+      setIsEditMode(false);
     }
   }, [showTaskDrawer]);
 
@@ -69,6 +83,17 @@ function Board({
     if (!result.destination) return;
     console.log({ result });
     // TODO: Implement reordering of tasks
+  }
+
+  function handleSave(task: Partial<Task>) {
+    if (!isEditMode) {
+      return addTaskMutation.mutate({
+        ...task,
+        position: groupedTasks?.[task.status!]?.length ?? 0,
+      });
+    }
+
+    updateTaskMutation.mutate(task);
   }
 
   if (isLoading) {
@@ -82,83 +107,23 @@ function Board({
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
       <section className="bg-white rounded-lg h-full flex-1 flex gap-4 p-4 mt-2 overflow-auto custom-scrollar">
-        {groupedTasks &&
-          Object.entries(groupedTasks).map(([status, tasks]) => (
-            <Column
-              key={status}
-              name={status as TaskStatus}
-              tasks={tasks}
-              setShowTaskDrawer={setShowTaskDrawer}
-              setActiveTask={setActiveTask}
-            />
-          ))}
-
-        {groupedTasks && Object.entries(groupedTasks).length === 0 && (
+        {groupedTasks && (
           <>
             {defaultTaskStatus.map((status) => (
               <Column
                 key={status}
                 name={status}
-                tasks={status === 'to do' ? [task] : []}
+                tasks={groupedTasks[status] ?? []}
                 setShowTaskDrawer={setShowTaskDrawer}
                 setActiveTask={setActiveTask}
+                setIsEditMode={setIsEditMode}
               />
             ))}
           </>
         )}
       </section>
-      <TaskDrawer task={activeTask} />
+      <TaskDrawer task={activeTask} handleSave={handleSave} />
     </DragDropContext>
-  );
-}
-
-function Column({
-  name,
-  tasks,
-  setShowTaskDrawer,
-  setActiveTask,
-}: {
-  name: TaskStatus;
-  tasks: Task[];
-  setShowTaskDrawer: (val: boolean) => void;
-  setActiveTask: Dispatch<SetStateAction<Partial<Task>>>;
-}) {
-  return (
-    <Droppable droppableId={name}>
-      {(provided) => (
-        <div
-          ref={provided.innerRef}
-          {...provided.droppableProps}
-          className="min-w-56 flex-1 flex flex-col gap-4 pb-2"
-        >
-          <header className="flex items-center justify-between">
-            <h4 className="text-lg capitalize">{name}</h4>
-            <button className="">
-              <BiMenuAltLeft className="-scale-y-100" size={20} />
-            </button>
-          </header>
-          {tasks.map((task, idx) => (
-            <TaskCard key={task._id} index={idx} task={task} />
-          ))}
-          {provided.placeholder}
-
-          <Button
-            onClick={() => {
-              setActiveTask((prev) => ({
-                ...prev,
-                status: name,
-              }));
-              setShowTaskDrawer(true);
-            }}
-            className="justify-between bg-neutral-800 font-normal"
-          >
-            Add new
-            <IoMdAdd size={20} />
-          </Button>
-          <div className="h-[0.5px] shrink-0 w-full invisible" />
-        </div>
-      )}
-    </Droppable>
   );
 }
 

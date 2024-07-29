@@ -5,11 +5,21 @@ import { MdOutlineWatchLater } from 'react-icons/md';
 import { type Task } from '@/types';
 import { Draggable } from '@hello-pangea/dnd';
 
-function TaskCard({ task, index }: { task: Task; index: number }) {
+function TaskCard({
+  task,
+  index,
+  handleClick,
+}: {
+  task: Task;
+  index: number;
+
+  handleClick: () => void;
+}) {
   return (
     <Draggable key={task._id} draggableId={task._id} index={index}>
       {(provided) => (
         <div
+          onClick={() => handleClick()}
           ref={provided.innerRef}
           {...provided.dragHandleProps}
           {...provided.draggableProps}
