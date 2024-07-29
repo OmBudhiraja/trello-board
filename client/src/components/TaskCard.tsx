@@ -1,24 +1,35 @@
+'use client';
 import clsx from 'clsx';
 import TimeAgo from 'react-timeago';
 import { MdOutlineWatchLater } from 'react-icons/md';
 import { type Task } from '@/types';
+import { Draggable } from '@hello-pangea/dnd';
 
-function TaskCard({ task }: { task: Task }) {
+function TaskCard({ task, index }: { task: Task; index: number }) {
   return (
-    <div className="w-full bg-gray-100 border-[1.5px] border-gray-200 p-3.5 rounded-lg flex flex-col gap-1.5">
-      <h4 className="font-medium text-[15px] leading-snug">{task.title}</h4>
-      <p className="text-sm leading-snug line-clamp-3 text-gray-500">{task.description}</p>
-      {task.priority && <PriorityTile priority={task.priority} />}
-      {task.deadline && (
-        <div className="flex gap-2 items-center text-sm mt-2 font-medium">
-          <MdOutlineWatchLater size={18} />
-          {task.deadline.toISOString().split('T')[0]}
+    <Draggable key={task._id} draggableId={task._id} index={index}>
+      {(provided) => (
+        <div
+          ref={provided.innerRef}
+          {...provided.dragHandleProps}
+          {...provided.draggableProps}
+          className="w-full bg-gray-100 border-[1.5px] border-gray-200 p-3.5 rounded-lg flex flex-col gap-1.5"
+        >
+          <h4 className="font-medium text-[15px] leading-snug">{task.title}</h4>
+          <p className="text-sm leading-snug line-clamp-3 text-gray-500">{task.description}</p>
+          {task.priority && <PriorityTile priority={task.priority} />}
+          {task.deadline && (
+            <div className="flex gap-2 items-center text-sm mt-2 font-medium">
+              <MdOutlineWatchLater size={18} />
+              {task.deadline.toISOString().split('T')[0]}
+            </div>
+          )}
+          <div className="text-sm font-medium text-gray-500 mt-3">
+            <TimeAgo date={task.createdAt} />
+          </div>
         </div>
       )}
-      <div className="text-sm font-medium text-gray-500 mt-3">
-        <TimeAgo date={task.createdAt} />
-      </div>
-    </div>
+    </Draggable>
   );
 }
 

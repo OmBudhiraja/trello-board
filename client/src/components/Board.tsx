@@ -1,6 +1,7 @@
+'use client';
 import { useQuery } from '@tanstack/react-query';
 import { BiLoaderAlt, BiMenuAltLeft } from 'react-icons/bi';
-import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, type DropResult } from '@hello-pangea/dnd';
 import { IoMdAdd } from 'react-icons/io';
 import { getTasks } from '@/api/task';
 import { defaultTaskStatus, type Task, type TaskStatus } from '@/types';
@@ -37,7 +38,11 @@ function Board() {
     refetchOnWindowFocus: false,
   });
 
-  function handleDragEnd() {}
+  function handleDragEnd(result: DropResult) {
+    if (!result.destination) return;
+    console.log({ result });
+    // TODO: Implement reordering of tasks
+  }
 
   if (isLoading) {
     return (
@@ -58,7 +63,7 @@ function Board() {
         {groupedTasks && Object.entries(groupedTasks).length === 0 && (
           <>
             {defaultTaskStatus.map((status) => (
-              <Column key={status} name={status} tasks={[task, task, task]} />
+              <Column key={status} name={status} tasks={status === 'to do' ? [task] : []} />
             ))}
           </>
         )}
@@ -69,25 +74,32 @@ function Board() {
 
 function Column({ name, tasks }: { name: string; tasks: Task[] }) {
   return (
-    <div className="min-w-56 flex-1 flex flex-col gap-4 pb-2">
-      <header className="flex items-center justify-between">
-        <h4 className="text-lg capitalize">{name}</h4>
-        <button className="">
-          <BiMenuAltLeft className="-scale-y-100" size={20} />
-        </button>
-      </header>
-      <Droppable></Droppable>
-      {tasks.map((task) => (
-        <Draggable>
-          <TaskCard key={task._id} task={task} />
-        </Draggable>
-      ))}
-      <Button className="justify-between bg-neutral-800 font-normal">
-        Add new
-        <IoMdAdd size={20} />
-      </Button>
-      <div className="h-[0.5px] shrink-0 w-full invisible" />
-    </div>
+    <Droppable droppableId={name}>
+      {(provided) => (
+        <div
+          ref={provided.innerRef}
+          {...provided.droppableProps}
+          className="min-w-56 flex-1 flex flex-col gap-4 pb-2"
+        >
+          <header className="flex items-center justify-between">
+            <h4 className="text-lg capitalize">{name}</h4>
+            <button className="">
+              <BiMenuAltLeft className="-scale-y-100" size={20} />
+            </button>
+          </header>
+          {tasks.map((task, idx) => (
+            <TaskCard key={task._id} index={idx} task={task} />
+          ))}
+          {provided.placeholder}
+
+          <Button className="justify-between bg-neutral-800 font-normal">
+            Add new
+            <IoMdAdd size={20} />
+          </Button>
+          <div className="h-[0.5px] shrink-0 w-full invisible" />
+        </div>
+      )}
+    </Droppable>
   );
 }
 
