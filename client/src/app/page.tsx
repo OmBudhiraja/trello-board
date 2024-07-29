@@ -29,12 +29,12 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen flex text-gray-500">
+    <main className="h-screen overflow-hidden flex text-gray-600">
       <Sidebar />
-      <div className="flex-1 h-screen w-full py-6 px-4 flex flex-col gap-4 bg-gray-100">
+      <div className="overflow-hidden flex-1 h-screen w-full py-6 px-4 flex flex-col gap-4 bg-gray-100">
         <section className="flex justify-between items-center">
-          <h3 className="text-3xl font-semibold">Good morning, {user.name}!</h3>
-          <button className="flex gap-2 items-center">
+          <h3 className="text-2xl lg:text-3xl font-semibold">Good morning, {user.name}!</h3>
+          <button className="text-sm lg:text-base flex gap-2 items-center">
             <span>Help & Feedback</span>
             <BsQuestionCircle size={20} />
           </button>
@@ -52,24 +52,24 @@ export default function Home() {
               className="absolute cursor-default top-1/2 -translate-y-1/2 right-2 text-gray-500"
             />
           </div>
-          <div className="flex items-center gap-3.5">
-            <button className="w-fit flex items-center gap-2 justify-center rounded-md py-2 px-2 text-sm">
+          <div className="flex items-center gap-2 lg:gap-3.5">
+            <button className="w-fit flex items-center gap-2 justify-center rounded-md py-2 px-2 text-xs lg:text-sm">
               Calender View
-              <CiCalendar size={18} />
+              <CiCalendar className="size-3.5 lg:size-5" />
             </button>
-            <button className="w-fit flex items-center gap-2 justify-center rounded-md py-2 px-2 text-sm">
+            <button className="w-fit flex items-center gap-2 justify-center rounded-md py-2 px-2 text-xs lg:text-sm">
               Automation
-              <BsStars size={18} />
+              <BsStars className="size-3.5 lg:size-5" />
             </button>
-            <button className="w-fit flex items-center gap-2 justify-center rounded-md py-2 px-2 text-sm">
+            <button className="w-fit flex items-center gap-2 justify-center rounded-md py-2 px-2 text-xs lg:text-sm">
               Filter
-              <FiFilter size={18} />
+              <FiFilter className="size-3.5 lg:size-5" />
             </button>
-            <button className="w-fit flex items-center gap-2 justify-center rounded-md py-2 px-2 text-sm">
+            <button className="w-fit flex items-center gap-2 justify-center rounded-md py-2 px-2 text-xs lg:text-sm">
               Share
-              <GoShareAndroid size={18} />
+              <GoShareAndroid className="size-3.5 lg:size-5" />
             </button>
-            <Button className="w-fit shrink-0">
+            <Button className="w-fit shrink-0 lg:px-2.5">
               Create New
               <BsFillPlusCircleFill size={20} />
             </Button>

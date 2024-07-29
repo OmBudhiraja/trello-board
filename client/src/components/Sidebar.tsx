@@ -47,7 +47,7 @@ function Sidebar() {
   const { user } = useUser();
 
   return (
-    <aside className="h-screen overflow-y-auto w-[17rem] border-r-2 border-gray-300 py-6 px-4 flex flex-col gap-2 text-gray-500">
+    <aside className="h-screen shrink-0 overflow-y-auto w-64 border-r-2 border-gray-300 py-6 px-4 flex flex-col gap-2 text-gray-500">
       <div className="flex items-center gap-3">
         <div className="p-2 rounded-md bg-gray-200 w-fit">
           <FaUser size={22} />

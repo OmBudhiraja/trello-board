@@ -21,6 +21,10 @@ const taskSchema = new Schema(
     deadline: {
       type: Date,
     },
+    position: {
+      type: Number,
+      required: true,
+    },
     userId: { type: Schema.Types.ObjectId, required: true },
   },
   {

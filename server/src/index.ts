@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import authRouter from './routes/auth';
+import tasksRouter from './routes/tasks';
 import protect from './middleware/auth';
 import mongoose from 'mongoose';
 
@@ -30,6 +31,7 @@ async function main() {
   });
 
   app.use('/api/auth', authRouter);
+  app.use('/api/tasks', tasksRouter);
 
   app.use((err: Error, _: Request, res: Response, next: NextFunction) => {
     if (err instanceof SyntaxError && (err as any).status === 400 && 'body' in err) {
