@@ -15,6 +15,7 @@ export interface Task {
   description?: string;
   status: TaskStatus;
   priority?: (typeof priorityOptions)[number];
+  content: string;
   userId: string;
   position: number;
   deadline?: Date;

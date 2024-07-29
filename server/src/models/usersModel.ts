@@ -1,4 +1,4 @@
-import { InferSchemaType, Schema, model } from 'mongoose';
+import { InferSchemaType, Schema, Types, model } from 'mongoose';
 import bcrypt from 'bcrypt';
 
 const userSchema = new Schema(
@@ -31,7 +31,7 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-export type User = InferSchemaType<typeof userSchema>;
+export type User = InferSchemaType<typeof userSchema> & { _id: Types.ObjectId };
 const UserModel = model('User', userSchema);
 
 export default UserModel;
