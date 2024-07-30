@@ -52,7 +52,7 @@ function PriorityTile({ priority }: { priority: Task['priority'] }) {
         {
           'bg-green-500': priority === 'low',
           'bg-yellow-500': priority === 'medium',
-          'bg-red-500': priority === 'urgent',
+          'bg-red-400': priority === 'urgent',
         }
       )}
     >
