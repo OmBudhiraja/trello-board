@@ -26,7 +26,7 @@ async function main() {
 
   app.get('/', protect, async (req, res) => {
     res.json({
-      message: 'hello world',
+      message: 'health check',
     });
   });
 
