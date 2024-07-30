@@ -106,6 +106,26 @@ export async function updateTask(req: Request, res: Response) {
   }
 }
 
+export async function deleteTask(req: Request, res: Response) {
+  try {
+    const taskId = req.params.id;
+    const user = req.user;
+
+    if (!user) {
+      return res.status(500).json({ message: 'Internal Server Error' });
+    }
+
+    await TaskModel.deleteOne({ userId: user._id.toString(), _id: taskId });
+
+    res.status(202).json({
+      taskId,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}
+
 const updatePositionAndStatusSchema = z.object({
   status: z.enum(statusEnum),
   position: z.number(),

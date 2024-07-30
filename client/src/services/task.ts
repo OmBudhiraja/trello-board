@@ -16,6 +16,11 @@ export async function updateTask(task: Partial<Task>) {
   return res.data;
 }
 
+export async function deleteTask(id: string) {
+  const res = await apiClient.delete<{ taskId: string }>(`/tasks/${id}`);
+  return res.data;
+}
+
 type ReorderTask = {
   _id: string;
   position: number;

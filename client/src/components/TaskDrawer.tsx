@@ -14,15 +14,22 @@ import Button from './Button';
 import toast from 'react-hot-toast';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { FiTrash } from 'react-icons/fi';
 
 function TaskDrawer({
   task,
   handleSave,
+  handleDelete,
   isSaving,
+  isDeletePending,
+  isEditMode,
 }: {
   task: Partial<Task>;
   handleSave: (task: Partial<Task>) => void;
+  handleDelete: (id: string) => void;
   isSaving: boolean;
+  isDeletePending: boolean;
+  isEditMode: boolean;
 }) {
   const [title, setTitle] = useState(task.title ?? '');
   const [status, setStatus] = useState(task.status ?? '');
@@ -61,9 +68,9 @@ function TaskDrawer({
 
   return (
     <Drawer.Portal>
-      <Drawer.Overlay className="fixed inset-0 bg-black/40" />
+      <Drawer.Overlay className="fixed inset-0 bg-black/70" />
       <Drawer.Content
-        className="bg-white flex flex-col h-full w-[600px] py-4 px-6 fixed bottom-0 right-0 text-gray-500"
+        className="bg-white flex flex-col h-full w-[650px] py-4 px-6 fixed bottom-0 right-0 text-gray-500"
         aria-describedby="Create or edit Tasks"
       >
         <Drawer.Handle />
@@ -94,15 +101,26 @@ function TaskDrawer({
             >
               Save
             </Button>
+            {isEditMode && task._id && (
+              <Button
+                disabled={isDeletePending}
+                isLoading={isDeletePending}
+                className="bg-red-600"
+                title="delete task"
+                onClick={() => task._id && handleDelete(task._id)}
+              >
+                <FiTrash size={20} />
+              </Button>
+            )}
           </div>
         </header>
-        <section className="flex flex-col gap-7 mt-7">
+        <section className="flex flex-col gap-7 mt-6">
           <input
             type="text"
             placeholder="Title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="font-semibold text-4xl lg:text-5xl outline-none text-gray-600"
+            className="font-semibold text-4xl lg:text-[44px] outline-none text-gray-600"
           />
           <div className="flex flex-col gap-6">
             <div className="flex items-center gap-10">

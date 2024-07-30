@@ -1,5 +1,5 @@
 import { useUser } from '@/components/UserProvider';
-import { createTask, reorderTasks, updateTask } from '@/services/task';
+import { createTask, deleteTask, reorderTasks, updateTask } from '@/services/task';
 import { login, logout, signup } from '@/services/user';
 import { Task } from '@/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -54,6 +54,23 @@ export function useReoderTasks() {
     mutationFn: reorderTasks,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+  });
+}
+
+export function useDeleteTask({ onSuccessHandler }: { onSuccessHandler: () => void }) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteTask,
+    onSuccess: (data) => {
+      queryClient.setQueryData(['tasks'], (oldData: { tasks: Task[] }) => {
+        const updatedTasks = oldData.tasks.filter((task) => task._id !== data.taskId);
+        return { tasks: updatedTasks };
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      onSuccessHandler();
+      toast.success('Task deleted successfully');
     },
   });
 }

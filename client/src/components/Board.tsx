@@ -8,7 +8,7 @@ import TaskDrawer from './TaskDrawer';
 import Column from './Column';
 import { transformTaskList } from '@/utils/transformTaskData';
 import { useTasks } from '@/api/queries';
-import { useAddTask, useReoderTasks, useUpdateTask } from '@/api/mutations';
+import { useAddTask, useDeleteTask, useReoderTasks, useUpdateTask } from '@/api/mutations';
 
 const defaultEmptyTask: Partial<Task> = {
   title: '',
@@ -42,6 +42,12 @@ function Board({
   });
 
   const reorderMutation = useReoderTasks();
+
+  const deleteTaskMutation = useDeleteTask({
+    onSuccessHandler: () => {
+      setShowTaskDrawer(false);
+    },
+  });
 
   const [activeTask, setActiveTask] = useState<Partial<Task>>(defaultEmptyTask);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -182,7 +188,14 @@ function Board({
           </>
         )}
       </section>
-      <TaskDrawer task={activeTask} handleSave={handleSave} isSaving={isSaving} />
+      <TaskDrawer
+        task={activeTask}
+        handleSave={handleSave}
+        isSaving={isSaving}
+        isEditMode={isEditMode}
+        handleDelete={deleteTaskMutation.mutate}
+        isDeletePending={deleteTaskMutation.isPending}
+      />
     </DragDropContext>
   );
 }
