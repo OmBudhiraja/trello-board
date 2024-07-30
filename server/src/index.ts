@@ -4,7 +4,6 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import authRouter from './routes/auth';
 import tasksRouter from './routes/tasks';
-import protect from './middleware/auth';
 import mongoose from 'mongoose';
 
 dotenv.config();
@@ -24,7 +23,7 @@ app.use(
 async function main() {
   await mongoose.connect(process.env.DB_URL!);
 
-  app.get('/', protect, async (req, res) => {
+  app.get('/', async (req, res) => {
     res.json({
       message: 'health check',
     });
