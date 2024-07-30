@@ -16,9 +16,11 @@ import toast from 'react-hot-toast';
 function TaskDrawer({
   task,
   handleSave,
+  isSaving,
 }: {
   task: Partial<Task>;
   handleSave: (task: Partial<Task>) => void;
+  isSaving: boolean;
 }) {
   const [title, setTitle] = useState(task.title ?? '');
   const [status, setStatus] = useState(task.status ?? '');
@@ -82,7 +84,12 @@ function TaskDrawer({
               Favourite
               <GoShareAndroid size={20} />
             </button>
-            <Button onClick={onSave} className="rounded-md">
+            <Button
+              disabled={isSaving}
+              isLoading={isSaving}
+              onClick={onSave}
+              className="rounded-md"
+            >
               Save
             </Button>
           </div>

@@ -32,7 +32,7 @@ export default function SignupPage() {
     },
     onSuccess: (data) => {
       setUser(data.user);
-      toast.success('Login successful');
+      toast.success('Signed up successfully');
     },
   });
 
@@ -102,7 +102,13 @@ export default function SignupPage() {
             )}
           </button>
         </div>
-        <Button type="submit">Sign up</Button>
+        <Button
+          disabled={loginMutation.isPending}
+          isLoading={loginMutation.isPending}
+          type="submit"
+        >
+          Sign up
+        </Button>
         <div className="text-center mt-3">
           <span className="text-gray-500">Already have an account? </span>
           <Link className="text-blue-800" href="/login">

@@ -90,7 +90,11 @@ export default function LoginPage() {
             )}
           </button>
         </div>
-        <Button disabled={loginMutation.isPending} type="submit">
+        <Button
+          disabled={loginMutation.isPending}
+          isLoading={loginMutation.isPending}
+          type="submit"
+        >
           Login
         </Button>
         <div className="text-center mt-3">

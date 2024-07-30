@@ -72,6 +72,8 @@ function Board({
   const [activeTask, setActiveTask] = useState<Partial<Task>>(defaultEmptyTask);
   const [isEditMode, setIsEditMode] = useState(false);
 
+  const isSaving = addTaskMutation.isPending || updateTaskMutation.isPending;
+
   useEffect(() => {
     if (!showTaskDrawer) {
       setActiveTask(defaultEmptyTask);
@@ -82,7 +84,15 @@ function Board({
   function handleDragEnd(result: DropResult) {
     if (!result.destination) return;
     console.log({ result });
-    // TODO: Implement reordering of tasks
+    const { source, destination, draggableId } = result;
+
+    if (source.droppableId === destination.droppableId && source.index === destination.index) {
+      return;
+    }
+
+    // handle reordering within the same column
+    if (source.droppableId === destination.droppableId) {
+    }
   }
 
   function handleSave(task: Partial<Task>) {
@@ -122,7 +132,7 @@ function Board({
           </>
         )}
       </section>
-      <TaskDrawer task={activeTask} handleSave={handleSave} />
+      <TaskDrawer task={activeTask} handleSave={handleSave} isSaving={isSaving} />
     </DragDropContext>
   );
 }
