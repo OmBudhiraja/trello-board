@@ -7,6 +7,7 @@ import { useUser } from '@/components/UserProvider';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/Button';
 import { useSignup } from '@/api/mutations';
+import FullScreenLoader from '@/components/FullScreenLoader';
 
 export default function SignupPage() {
   const [name, setName] = useState('');
@@ -31,7 +32,7 @@ export default function SignupPage() {
   }, [user, router]);
 
   if (user) {
-    return null;
+    return <FullScreenLoader />;
   }
 
   return (

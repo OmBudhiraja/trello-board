@@ -7,6 +7,7 @@ import { useUser } from '@/components/UserProvider';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/Button';
 import { useLogin } from '@/api/mutations';
+import FullScreenLoader from '@/components/FullScreenLoader';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -30,7 +31,7 @@ export default function LoginPage() {
   }, [user, router]);
 
   if (user) {
-    return null;
+    return <FullScreenLoader />;
   }
 
   return (

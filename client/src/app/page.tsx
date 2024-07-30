@@ -14,6 +14,7 @@ import { GoShareAndroid } from 'react-icons/go';
 import Button from '@/components/Button';
 import Board from '@/components/Board';
 import { DrawerRoot } from '@/components/TaskDrawer';
+import FullScreenLoader from '@/components/FullScreenLoader';
 
 export default function Home() {
   const { user } = useUser();
@@ -28,7 +29,7 @@ export default function Home() {
   }, [user, router]);
 
   if (!user) {
-    return null;
+    return <FullScreenLoader />;
   }
 
   return (
