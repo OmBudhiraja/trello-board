@@ -1,6 +1,6 @@
 # Trello Board
 
-Live Link - [https://trello-board-one.vercel.app/login](https://trello-board-one.vercel.app/login) 
+Live Link - [https://trello-board-one.vercel.app](https://trello-board-one.vercel.app) 
 
 ### Local Setup
 
