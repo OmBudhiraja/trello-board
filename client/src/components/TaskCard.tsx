@@ -4,6 +4,7 @@ import TimeAgo from 'react-timeago';
 import { MdOutlineWatchLater } from 'react-icons/md';
 import { type Task } from '@/types';
 import { Draggable } from '@hello-pangea/dnd';
+import { memo } from 'react';
 
 function TaskCard({
   task,
@@ -13,13 +14,13 @@ function TaskCard({
   task: Task;
   index: number;
 
-  handleClick: () => void;
+  handleClick: (task: Task) => void;
 }) {
   return (
     <Draggable key={task._id} draggableId={task._id} index={index}>
       {(provided) => (
         <div
-          onClick={() => handleClick()}
+          onClick={() => handleClick(task)}
           ref={provided.innerRef}
           {...provided.dragHandleProps}
           {...provided.draggableProps}
@@ -60,4 +61,4 @@ function PriorityTile({ priority }: { priority: Task['priority'] }) {
   );
 }
 
-export default TaskCard;
+export default memo(TaskCard);

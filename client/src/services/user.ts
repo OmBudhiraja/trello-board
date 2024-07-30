@@ -1,5 +1,5 @@
-import { User } from '@/types';
 import apiClient from './client';
+import { User } from '@/types';
 
 type UserRes = {
   user: User;

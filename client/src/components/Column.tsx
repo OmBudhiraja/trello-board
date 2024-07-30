@@ -1,4 +1,4 @@
-import { type Dispatch, type SetStateAction } from 'react';
+import { useCallback, type Dispatch, type SetStateAction } from 'react';
 import { IoMdAdd } from 'react-icons/io';
 import Button from './Button';
 import TaskCard from './TaskCard';
@@ -19,6 +19,15 @@ function Column({
   setActiveTask: Dispatch<SetStateAction<Partial<Task>>>;
   setIsEditMode: Dispatch<SetStateAction<boolean>>;
 }) {
+  const handleTaskClick = useCallback(
+    (task: Task) => {
+      setActiveTask(task);
+      setIsEditMode(true);
+      setShowTaskDrawer(true);
+    },
+    [setActiveTask, setIsEditMode, setShowTaskDrawer]
+  );
+
   return (
     <Droppable droppableId={name}>
       {(provided) => (
@@ -34,16 +43,7 @@ function Column({
             </button>
           </header>
           {tasks.map((task, idx) => (
-            <TaskCard
-              key={task._id}
-              index={idx}
-              task={task}
-              handleClick={() => {
-                setActiveTask(task);
-                setIsEditMode(true);
-                setShowTaskDrawer(true);
-              }}
-            />
+            <TaskCard key={task._id} index={idx} task={task} handleClick={handleTaskClick} />
           ))}
           {provided.placeholder}
 

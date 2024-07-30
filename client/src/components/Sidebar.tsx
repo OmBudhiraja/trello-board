@@ -1,6 +1,3 @@
-import { logout } from '@/api/user';
-import { useMutation } from '@tanstack/react-query';
-import toast from 'react-hot-toast';
 import { FaUser } from 'react-icons/fa';
 import { IoNotificationsOutline } from 'react-icons/io5';
 import { PiSpinnerBold } from 'react-icons/pi';
@@ -14,6 +11,7 @@ import { AiOutlineLineChart } from 'react-icons/ai';
 import { useUser } from './UserProvider';
 import { TfiDownload } from 'react-icons/tfi';
 import Button from './Button';
+import { useLogout } from '@/api/mutations';
 
 const tabs = [
   {
@@ -43,7 +41,7 @@ const tabs = [
   },
 ];
 
-function Sidebar({setShowTaskDrawer}: { setShowTaskDrawer: (val: boolean) => void }) {
+function Sidebar({ setShowTaskDrawer }: { setShowTaskDrawer: (val: boolean) => void }) {
   const { user } = useUser();
 
   return (
@@ -86,20 +84,8 @@ function Sidebar({setShowTaskDrawer}: { setShowTaskDrawer: (val: boolean) => voi
 }
 
 function ActionButtons() {
-  const { setUser } = useUser();
-
-  const logoutMutation = useMutation({
-    mutationFn: async () => {
-      await logout();
-    },
-    onError: (err) => {
-      toast.error('Something went wrong');
-    },
-    onSuccess: () => {
-      toast.success('Logged out');
-      setUser(null);
-    },
-  });
+  console.log('here ------------------------', useLogout);
+  const logoutMutation = useLogout();
 
   return (
     <div className="text-gray-600 flex items-center justify-between">

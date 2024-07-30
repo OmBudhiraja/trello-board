@@ -1,14 +1,14 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import toast from 'react-hot-toast';
+import { useQueryClient } from '@tanstack/react-query';
 import { DragDropContext, type DropResult } from '@hello-pangea/dnd';
 import { BiLoaderAlt } from 'react-icons/bi';
-import { createTask, getTasks, updateTask } from '@/api/task';
 import { defaultTaskStatus, type Task, type TaskStatus } from '@/types';
 import TaskDrawer from './TaskDrawer';
 import Column from './Column';
 import { transformTaskList } from '@/utils/transformTaskData';
+import { useTasks } from '@/api/queries';
+import { useAddTask, useReoderTasks, useUpdateTask } from '@/api/mutations';
 
 const defaultEmptyTask: Partial<Task> = {
   title: '',
@@ -27,47 +27,25 @@ function Board({
   setShowTaskDrawer: (val: boolean) => void;
 }) {
   const queryClient = useQueryClient();
-  const { isLoading, data: groupedTasks } = useQuery({
-    queryKey: ['tasks'],
-    queryFn: getTasks,
-    select: transformTaskList,
-    refetchOnWindowFocus: false,
-  });
+  const { isLoading, data: groupedTasks } = useTasks();
 
-  const addTaskMutation = useMutation({
-    mutationFn: createTask,
-    onSuccess: ({ task: newTask }) => {
-      toast.success('Task created successfully');
-
-      queryClient.setQueryData(['tasks'], (oldData: { tasks: Task[] }) => {
-        const updatedTasks = [...oldData.tasks, newTask];
-        return { tasks: updatedTasks };
-      });
-
+  const addTaskMutation = useAddTask({
+    onSuccessHandler: () => {
       setShowTaskDrawer(false);
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
     },
   });
 
-  const updateTaskMutation = useMutation({
-    mutationFn: updateTask,
-    onSuccess: ({ task: updatedTask }) => {
-      toast.success('Task updated successfully');
-
-      queryClient.setQueryData(['tasks'], (oldData: { tasks: Task[] }) => {
-        const updatedTasks = oldData.tasks.map((task) => {
-          if (task._id === updatedTask._id) {
-            return updatedTask;
-          }
-          return task;
-        });
-        return { tasks: updatedTasks };
-      });
-
+  const updateTaskMutation = useUpdateTask({
+    onSuccessHandler: () => {
       setShowTaskDrawer(false);
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
     },
   });
+
+  const reorderMutation = useReoderTasks();
+
+  useEffect(() => {
+    console.log('groupedTasks has changed', groupedTasks);
+  }, [groupedTasks]);
 
   const [activeTask, setActiveTask] = useState<Partial<Task>>(defaultEmptyTask);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -82,17 +60,93 @@ function Board({
   }, [showTaskDrawer]);
 
   function handleDragEnd(result: DropResult) {
-    if (!result.destination) return;
-    console.log({ result });
+    if (!result.destination || !groupedTasks) return;
+
     const { source, destination, draggableId } = result;
 
     if (source.droppableId === destination.droppableId && source.index === destination.index) {
       return;
     }
 
-    // handle reordering within the same column
-    if (source.droppableId === destination.droppableId) {
+    const sourceCol = groupedTasks[source.droppableId as TaskStatus];
+    const destCol = groupedTasks[destination.droppableId as TaskStatus];
+
+    if (sourceCol === destCol) {
+      const tasks = [...sourceCol];
+      const [removed] = tasks.splice(source.index, 1);
+      tasks.splice(destination.index, 0, removed);
+
+      tasks.forEach((task, index) => {
+        task.position = index;
+      });
+
+      queryClient.setQueryData(['tasks'], () => {
+        const updatedTasks = defaultTaskStatus
+          .map((status) => {
+            if (status === source.droppableId) {
+              return tasks;
+            }
+            return groupedTasks[status as TaskStatus];
+          })
+          .filter(Boolean);
+        return { tasks: updatedTasks.flat() };
+      });
+
+      reorderMutation.mutate({
+        id: draggableId,
+        status: source.droppableId as TaskStatus,
+        position: destination.index,
+        sourceTasks: tasks.map(({ _id, position }) => ({ _id, position })),
+        destinationTasks: tasks.map(({ _id, position }) => ({ _id, position })),
+        sameColumn: true,
+      });
+
+      return;
     }
+
+    const sourceTasks = [...sourceCol];
+    const destTasks = destCol ? [...destCol] : [];
+
+    // Remove task from source column
+    const [removed] = sourceTasks.splice(source.index, 1);
+
+    destTasks.splice(destination.index, 0, {
+      ...removed,
+      status: destination.droppableId as TaskStatus,
+    });
+
+    sourceTasks.forEach((task, index) => {
+      task.position = index;
+    });
+
+    destTasks.forEach((task, index) => {
+      task.position = index;
+    });
+
+    // Add task to destination column
+
+    queryClient.setQueryData(['tasks'], () => {
+      const tasks = defaultTaskStatus
+        .map((status) => {
+          if (status === source.droppableId) {
+            return sourceTasks;
+          } else if (status === destination.droppableId) {
+            return destTasks;
+          }
+          return groupedTasks[status as TaskStatus];
+        })
+        .filter(Boolean);
+      return { tasks: tasks.flat() };
+    });
+
+    reorderMutation.mutate({
+      id: draggableId,
+      status: destination.droppableId as TaskStatus,
+      position: destination.index,
+      sourceTasks: sourceTasks.map(({ _id, position }) => ({ _id, position })),
+      destinationTasks: destTasks.map(({ _id, position }) => ({ _id, position })),
+      sameColumn: false,
+    });
   }
 
   function handleSave(task: Partial<Task>) {

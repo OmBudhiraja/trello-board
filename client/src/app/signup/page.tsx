@@ -5,11 +5,8 @@ import { VscEye } from 'react-icons/vsc';
 import { VscEyeClosed } from 'react-icons/vsc';
 import { useUser } from '@/components/UserProvider';
 import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
-import { AxiosError } from 'axios';
-import { useMutation } from '@tanstack/react-query';
-import { signup } from '@/api/user';
 import Button from '@/components/Button';
+import { useSignup } from '@/api/mutations';
 
 export default function SignupPage() {
   const [name, setName] = useState('');
@@ -20,25 +17,11 @@ export default function SignupPage() {
   const { user, setUser } = useUser();
   const router = useRouter();
 
-  const loginMutation = useMutation({
-    mutationFn: signup,
-    onError: (err) => {
-      if (err instanceof AxiosError) {
-        toast.error(err.response?.data.message || 'Something went wrong');
-      } else {
-        console.error(err, 'error');
-        toast.error(err.message);
-      }
-    },
-    onSuccess: (data) => {
-      setUser(data.user);
-      toast.success('Signed up successfully');
-    },
-  });
+  const signupMutation = useSignup();
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    loginMutation.mutate({ name, email, password });
+    signupMutation.mutate({ name, email, password });
   }
 
   useEffect(() => {
@@ -103,8 +86,8 @@ export default function SignupPage() {
           </button>
         </div>
         <Button
-          disabled={loginMutation.isPending}
-          isLoading={loginMutation.isPending}
+          disabled={signupMutation.isPending}
+          isLoading={signupMutation.isPending}
           type="submit"
         >
           Sign up

@@ -1,10 +1,10 @@
 'use client';
 
-import { getMe } from '@/api/user';
 import { User } from '@/types';
-import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { createContext, useContext } from 'react';
 import FullScreenLoader from './FullScreenLoader';
+import { useUserData } from '@/api/queries';
 
 const UserContext = createContext<{ user: User | null; setUser: (data: User | null) => void }>({
   user: null,
@@ -13,13 +13,7 @@ const UserContext = createContext<{ user: User | null; setUser: (data: User | nu
 
 const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const queryClient = useQueryClient();
-  const { isLoading, data } = useQuery({
-    queryKey: ['user'],
-    queryFn: getMe,
-    staleTime: Infinity,
-    retry: false,
-    refetchOnWindowFocus: false,
-  });
+  const { isLoading, data } = useUserData();
 
   function setUser(user: User | null) {
     queryClient.setQueryData(['user'], { user });
