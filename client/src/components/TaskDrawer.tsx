@@ -45,6 +45,7 @@ function TaskDrawer({
     if (!status) {
       return toast.error('Status is required');
     }
+    console.log('-----deadline', deadline, typeof deadline);
     handleSave({
       _id: task._id,
       title,
@@ -169,7 +170,6 @@ function TaskDrawer({
                   id="deadline"
                   type="date"
                   className="w-full outline-none text-gray-700"
-                  min={new Date().toISOString().split('T')[0]}
                   value={deadline?.toISOString().split('T')[0] ?? ''}
                   onChange={(e) => setDeadline(new Date(e.target.value))}
                 />

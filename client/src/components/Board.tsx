@@ -43,10 +43,6 @@ function Board({
 
   const reorderMutation = useReoderTasks();
 
-  useEffect(() => {
-    console.log('groupedTasks has changed', groupedTasks);
-  }, [groupedTasks]);
-
   const [activeTask, setActiveTask] = useState<Partial<Task>>(defaultEmptyTask);
   const [isEditMode, setIsEditMode] = useState(false);
 

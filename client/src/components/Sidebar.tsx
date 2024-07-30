@@ -84,7 +84,6 @@ function Sidebar({ setShowTaskDrawer }: { setShowTaskDrawer: (val: boolean) => v
 }
 
 function ActionButtons() {
-  console.log('here ------------------------', useLogout);
   const logoutMutation = useLogout();
 
   return (
