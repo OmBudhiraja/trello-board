@@ -11,6 +11,6 @@ export function setCookie(
     expires: new Date(Date.now() + expireTime),
     path: '/',
     secure: process.env.NODE_ENV === 'production',
+    sameSite: 'none',
   });
-  // res.cookie(flag, true, cookieOption);
 }
