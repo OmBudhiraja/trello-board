@@ -12,6 +12,8 @@ import { defaultTaskStatus, priorityOptions, TaskStatus, type Task } from '@/typ
 import { cn } from '@/utils/cn';
 import Button from './Button';
 import toast from 'react-hot-toast';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 function TaskDrawer({
   task,
@@ -45,7 +47,6 @@ function TaskDrawer({
     if (!status) {
       return toast.error('Status is required');
     }
-    console.log('-----deadline', deadline, typeof deadline);
     handleSave({
       _id: task._id,
       title,
@@ -166,12 +167,13 @@ function TaskDrawer({
                 Deadline
               </label>
               <div className="flex-1">
-                <input
+                <DatePicker
                   id="deadline"
-                  type="date"
-                  className="w-full outline-none text-gray-700"
-                  value={deadline?.toISOString().split('T')[0] ?? ''}
-                  onChange={(e) => setDeadline(new Date(e.target.value))}
+                  selected={deadline}
+                  onChange={(date) => setDeadline(date ?? undefined)}
+                  isClearable
+                  placeholderText="Not selected"
+                  className="w-full outline-none"
                 />
               </div>
             </div>

@@ -32,7 +32,7 @@ function TaskCard({
           {task.deadline && (
             <div className="flex gap-2 items-center text-sm mt-2 font-medium">
               <MdOutlineWatchLater size={18} />
-              {task.deadline.toISOString().split('T')[0]}
+              {new Date(task.deadline).toISOString().split('T')[0]}
             </div>
           )}
           <div className="text-sm font-medium text-gray-500 mt-3">

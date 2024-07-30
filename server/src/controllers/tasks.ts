@@ -24,7 +24,7 @@ const createTaskSchema = z
     description: z.string().optional(),
     status: z.enum(statusEnum),
     priority: z.enum(priorityEnum).optional(),
-    deadline: z.date().optional(),
+    deadline: z.coerce.date().optional(),
     position: z.number(),
     content: z.string().optional(),
   })
@@ -63,7 +63,7 @@ const updateTaskSchema = z
     description: z.string().optional(),
     status: z.enum(statusEnum),
     priority: z.enum(priorityEnum).optional(),
-    deadline: z.date().optional(),
+    deadline: z.coerce.date().optional(),
     position: z.number(),
     content: z.string().optional(),
   })
