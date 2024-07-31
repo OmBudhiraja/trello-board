@@ -27,7 +27,7 @@ function Board({
   setShowTaskDrawer: (val: boolean) => void;
 }) {
   const queryClient = useQueryClient();
-  const { isLoading, data: groupedTasks } = useTasks();
+  const { isLoading, data } = useTasks();
 
   const addTaskMutation = useAddTask({
     onSuccessHandler: () => {
@@ -54,12 +54,20 @@ function Board({
 
   const isSaving = addTaskMutation.isPending || updateTaskMutation.isPending;
 
+  const [groupedTasks, setGroupedTasks] = useState<Record<TaskStatus, Task[]> | null>(null);
+
   useEffect(() => {
     if (!showTaskDrawer) {
       setActiveTask(defaultEmptyTask);
       setIsEditMode(false);
     }
   }, [showTaskDrawer]);
+
+  useEffect(() => {
+    if (data) {
+      setGroupedTasks(data);
+    }
+  }, [data]);
 
   function handleDragEnd(result: DropResult) {
     if (!result.destination || !groupedTasks) return;
@@ -82,17 +90,16 @@ function Board({
         task.position = index;
       });
 
-      queryClient.setQueryData(['tasks'], () => {
-        const updatedTasks = defaultTaskStatus
-          .map((status) => {
-            if (status === source.droppableId) {
-              return tasks;
-            }
-            return groupedTasks[status as TaskStatus];
-          })
-          .filter(Boolean);
-        return { tasks: updatedTasks.flat() };
-      });
+      const updatedTasks = defaultTaskStatus
+        .map((status) => {
+          if (status === source.droppableId) {
+            return tasks;
+          }
+          return groupedTasks[status as TaskStatus];
+        })
+        .filter(Boolean);
+
+      setGroupedTasks(transformTaskList({ tasks: updatedTasks.flat() }));
 
       reorderMutation.mutate({
         id: draggableId,
@@ -125,21 +132,18 @@ function Board({
       task.position = index;
     });
 
-    // Add task to destination column
+    const tasks = defaultTaskStatus
+      .map((status) => {
+        if (status === source.droppableId) {
+          return sourceTasks;
+        } else if (status === destination.droppableId) {
+          return destTasks;
+        }
+        return groupedTasks[status as TaskStatus];
+      })
+      .filter(Boolean);
 
-    queryClient.setQueryData(['tasks'], () => {
-      const tasks = defaultTaskStatus
-        .map((status) => {
-          if (status === source.droppableId) {
-            return sourceTasks;
-          } else if (status === destination.droppableId) {
-            return destTasks;
-          }
-          return groupedTasks[status as TaskStatus];
-        })
-        .filter(Boolean);
-      return { tasks: tasks.flat() };
-    });
+    setGroupedTasks(transformTaskList({ tasks: tasks.flat() }));
 
     reorderMutation.mutate({
       id: draggableId,
@@ -173,20 +177,17 @@ function Board({
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
       <section className="bg-white rounded-lg h-full flex-1 flex gap-4 p-4 mt-2 overflow-auto custom-scrollar">
-        {groupedTasks && (
-          <>
-            {defaultTaskStatus.map((status) => (
-              <Column
-                key={status}
-                name={status}
-                tasks={groupedTasks[status] ?? []}
-                setShowTaskDrawer={setShowTaskDrawer}
-                setActiveTask={setActiveTask}
-                setIsEditMode={setIsEditMode}
-              />
-            ))}
-          </>
-        )}
+        {groupedTasks &&
+          defaultTaskStatus.map((status) => (
+            <Column
+              key={status}
+              name={status}
+              tasks={groupedTasks[status] ?? []}
+              setShowTaskDrawer={setShowTaskDrawer}
+              setActiveTask={setActiveTask}
+              setIsEditMode={setIsEditMode}
+            />
+          ))}
       </section>
       <TaskDrawer
         task={activeTask}
