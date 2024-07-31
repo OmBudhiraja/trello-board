@@ -168,13 +168,13 @@ export async function handleReorder(req: Request, res: Response) {
       ? body.sourceTasks
       : [...body.sourceTasks, ...body.destinationTasks];
 
-    await Promise.all(
-      tasksToUpdate.map((task) => {
-        return TaskModel.updateOne(
-          { userId: user._id.toString(), _id: task._id },
-          { position: task.position }
-        );
-      })
+    TaskModel.bulkWrite(
+      tasksToUpdate.map((task) => ({
+        updateOne: {
+          filter: { _id: task._id, userId: user._id.toString() },
+          update: { position: task.position },
+        },
+      }))
     );
 
     res.status(204).end();

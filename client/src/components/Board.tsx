@@ -106,7 +106,7 @@ function Board({
         status: source.droppableId as TaskStatus,
         position: destination.index,
         sourceTasks: tasks.map(({ _id, position }) => ({ _id, position })),
-        destinationTasks: tasks.map(({ _id, position }) => ({ _id, position })),
+        destinationTasks: [],
         sameColumn: true,
       });
 
