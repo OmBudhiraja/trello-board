@@ -127,26 +127,17 @@ export async function deleteTask(req: Request, res: Response) {
 }
 
 const updatePositionAndStatusSchema = z.object({
-  status: z.enum(statusEnum),
-  position: z.number(),
-  sameColumn: z.boolean(),
-  sourceTasks: z.array(
+  tasksToUpdate: z.array(
     z.object({
       _id: z.string(),
       position: z.number(),
-    })
-  ),
-  destinationTasks: z.array(
-    z.object({
-      _id: z.string(),
-      position: z.number(),
+      status: z.enum(statusEnum),
     })
   ),
 });
 
 export async function handleReorder(req: Request, res: Response) {
   try {
-    const taskId = req.params.id;
     const { sucess, body } = validate(updatePositionAndStatusSchema, req, res);
 
     if (!sucess) {
@@ -159,20 +150,11 @@ export async function handleReorder(req: Request, res: Response) {
       return res.status(500).json({ message: 'Internal Server Error' });
     }
 
-    await TaskModel.updateOne(
-      { userId: user._id.toString(), _id: taskId },
-      { position: body.position, status: body.status }
-    );
-
-    const tasksToUpdate = body.sameColumn
-      ? body.sourceTasks
-      : [...body.sourceTasks, ...body.destinationTasks];
-
     TaskModel.bulkWrite(
-      tasksToUpdate.map((task) => ({
+      body.tasksToUpdate.map((task) => ({
         updateOne: {
           filter: { _id: task._id, userId: user._id.toString() },
-          update: { position: task.position },
+          update: { position: task.position, status: task.status },
         },
       }))
     );

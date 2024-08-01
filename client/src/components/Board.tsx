@@ -102,12 +102,7 @@ function Board({
       setGroupedTasks(transformTaskList({ tasks: updatedTasks.flat() }));
 
       reorderMutation.mutate({
-        id: draggableId,
-        status: source.droppableId as TaskStatus,
-        position: destination.index,
-        sourceTasks: tasks.map(({ _id, position }) => ({ _id, position })),
-        destinationTasks: [],
-        sameColumn: true,
+        tasksToUpdate: tasks.map(({ _id, position, status }) => ({ _id, position, status })),
       });
 
       return;
@@ -146,12 +141,11 @@ function Board({
     setGroupedTasks(transformTaskList({ tasks: tasks.flat() }));
 
     reorderMutation.mutate({
-      id: draggableId,
-      status: destination.droppableId as TaskStatus,
-      position: destination.index,
-      sourceTasks: sourceTasks.map(({ _id, position }) => ({ _id, position })),
-      destinationTasks: destTasks.map(({ _id, position }) => ({ _id, position })),
-      sameColumn: false,
+      tasksToUpdate: [...sourceTasks, ...destTasks].map(({ _id, position, status }) => ({
+        _id,
+        position,
+        status,
+      })),
     });
   }
 

@@ -24,29 +24,12 @@ export async function deleteTask(id: string) {
 type ReorderTask = {
   _id: string;
   position: number;
+  status: TaskStatus;
 };
 
-export async function reorderTasks({
-  id,
-  status,
-  position,
-  sourceTasks,
-  destinationTasks,
-  sameColumn,
-}: {
-  id: string;
-  status: TaskStatus;
-  position: number;
-  sourceTasks: ReorderTask[];
-  destinationTasks: ReorderTask[];
-  sameColumn: boolean;
-}) {
-  const res = await apiClient.put(`/tasks/reorder/${id}`, {
-    status,
-    position,
-    sourceTasks,
-    destinationTasks,
-    sameColumn,
+export async function reorderTasks({ tasksToUpdate }: { tasksToUpdate: ReorderTask[] }) {
+  const res = await apiClient.put(`/tasks/reorder`, {
+    tasksToUpdate,
   });
   return res.data;
 }
